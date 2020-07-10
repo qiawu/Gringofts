@@ -209,7 +209,7 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 # openssl
 find_package(OpenSSL COMPONENTS Crypto SSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
-# TODO(https://jirap.corp.ebay.com/browse/RTCUTOFF-684): Fix version of OpenSSL::Crypto
+# TODO Fix version of OpenSSL::Crypto
 set(OPENSSL_LIBS
         OpenSSL::SSL
         OpenSSL::Crypto)
