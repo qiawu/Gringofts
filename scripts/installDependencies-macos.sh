@@ -1,6 +1,8 @@
 #!/bin/bash
 # This script installs all external dependencies
 
+export OPENSSL_ROOT_DIR=/usr/local/opt/openssl
+
 checkLastSuccess() {
   # shellcheck disable=SC2181
   if [[ $? -ne 0 ]]; then
@@ -11,10 +13,10 @@ checkLastSuccess() {
 
 # install grpc and related components
 # 1. install cares
-CARES=$(find /usr -name '*c-ares*')
+CARES=$(find /usr/local/lib -name '*c-ares*')
 if [ -z "$CARES" ]; then
   cd ~/temp/grpc/third_party/cares/cares &&
-    CXX=g++-7 CC=gcc-7 cmake -DCMAKE_BUILD_TYPE=Debug &&
+    cmake -DCMAKE_BUILD_TYPE=Debug &&
     make && make install
   checkLastSuccess "install cares fails"
 else
@@ -26,8 +28,8 @@ if [ -z "$PROTOBUF" ]; then
   cd ~/temp/grpc/third_party/protobuf/cmake &&
     mkdir -p build && cd build &&
     # use cmake instead of autogen.sh so that protobuf-config.cmake can be installed
-    CXX=g++-7 CC=gcc-7 cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Debug .. &&
-    make && make install && make clean && ldconfig
+    cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Debug .. &&
+    make && make install && make clean
   checkLastSuccess "install protobuf fails"
 else
   echo "protobuf v3.6 has been installed, skip"
@@ -41,10 +43,9 @@ if [ -z "$GRPC" ]; then
     sed -i -E "s/\(gRPC_CARES_PROVIDER.*\)module\(.*CACHE\)/\1package\2/" CMakeLists.txt &&
     sed -i -E "s/\(gRPC_SSL_PROVIDER.*\)module\(.*CACHE\)/\1package\2/" CMakeLists.txt &&
     sed -i -E "s/\(gRPC_PROTOBUF_PROVIDER.*\)module\(.*CACHE\)/\1package\2/" CMakeLists.txt &&
-    CXX=g++-7 CC=gcc-7 cmake -DCMAKE_BUILD_TYPE=Debug &&
-    make && make install && make clean && ldconfig
+    cmake -DCMAKE_BUILD_TYPE=Debug -DOPENSSL_CRYPTO_LIBRARY="/usr/local/opt/openssl/lib/libcrypto.dylib" -DOPENSSL_SSL_LIBRARY=/usr/local/opt/openssl/lib/libssl.dylib &&
+    make && make install && make clean
   checkLastSuccess "install grpc fails"
 else
   echo "gRPC v1.16 has been installed, skip"
 fi
-
